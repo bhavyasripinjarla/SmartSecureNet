@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartSecureNet Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: #e5e7eb;
+    padding: 20px;
+}
+
+h1 { color: #38bdf8; }
+
+.stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.card {
+    background: #020617;
+    padding: 15px 25px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+}
+
+.card span {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    margin-top: 25px;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+}
+
+th { background: #1e293b; }
+
+.LOW { color: #22c55e; font-weight: bold; }
+.MEDIUM { color: #facc15; font-weight: bold; }
+.HIGH { color: #ef4444; font-weight: bold; }
+
+.TRUSTED { color: #22c55e; font-weight: bold; }
+.NEUTRAL { color: #facc15; font-weight: bold; }
+.UNTRUSTED { color: #ef4444; font-weight: bold; }
+</style>
+</head>
+
+<body>
+
+<h1>🔐 SmartSecureNet – Live Wi-Fi Security Dashboard</h1>
+
+<!-- 🔴 LIVE PACKET STATS -->
+<div class="stats">
+    <div class="card">
+        📦 Total Packets<br>
+        <span>{{ packet_stats.total_packets }}</span>
+    </div>
+    <div class="card">
+        🛑 ARP Anomalies<br>
+        <span>{{ packet_stats.arp_anomalies }}</span>
+    </div>
+    <div class="card">
+        🌐 DNS Anomalies<br>
+        <span>{{ packet_stats.dns_anomalies }}</span>
+    </div>
+</div>
+
+<table>
+<tr>
+    <th>SSID</th>
+    <th>Signal (%)</th>
+    <th>Encryption</th>
+    <th>Risk</th>
+    <th>Trust</th>
+    <th>Status</th>
+</tr>
+
+{% for net in networks %}
+<tr>
+    <td>{{ net.ssid }}</td>
+    <td>{{ net.signal if net.signal else "-" }}</td>
+    <td>{{ net.encryption }}</td>
+    <td class="{{ net.risk }}">{{ net.risk }}</td>
+    <td>{{ net.trust }}/100</td>
+    <td class="{{ net.badge }}">{{ net.badge }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2 style="margin-top:30px;">📈 Trust Score History</h2>
+
+<select id="ssidSelect">
+{% for net in networks %}
+<option value="{{ net.ssid }}">{{ net.ssid }}</option>
+{% endfor %}
+</select>
+
+<canvas id="trustChart" height="100"></canvas>
+
+<script>
+const ctx = document.getElementById("trustChart").getContext("2d");
+let chart;
+
+function loadGraph(ssid) {
+    fetch(`/trust-history/${ssid}`)
+        .then(r => r.json())
+        .then(data => {
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: `Trust Score – ${ssid}`,
+                        data: data.scores,
+                        borderColor: "#38bdf8",
+                        fill: true
+                    }]
+                },
+                options: { scales: { y: { min: 0, max: 100 } } }
+            });
+        });
+}
+
+const select = document.getElementById("ssidSelect");
+loadGraph(select.value);
+select.addEventListener("change", () => loadGraph(select.value));
+</script>
+
+</body>
+</html>

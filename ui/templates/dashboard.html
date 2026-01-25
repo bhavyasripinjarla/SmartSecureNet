@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartSecureNet – ML Wi-Fi Trust Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #222;
+            color: white;
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+        }
+        .green { background: green; }
+        .orange { background: orange; }
+        .red { background: red; }
+        canvas {
+            width: 260px !important;
+            height: 120px !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🔐 SmartSecureNet – Wi-Fi Trust Evolution Dashboard</h1>
+
+<table>
+    <tr>
+        <th>SSID</th>
+        <th>Signal</th>
+        <th>Encryption</th>
+        <th>ML Verdict</th>
+        <th>Attack %</th>
+        <th>Trust Score</th>
+        <th>Status</th>
+        <th>Trust History</th>
+    </tr>
+
+    {% for net in networks %}
+    <tr>
+        <td>{{ net.ssid }}</td>
+        <td>{{ net.signal }}</td>
+        <td>{{ net.encryption }}</td>
+        <td>{{ net.prediction }}</td>
+        <td>{{ net.attack_prob }}%</td>
+        <td>{{ net.trust_score }}/100</td>
+        <td>
+            <span class="badge {{ net.badge_color }}">
+                {{ net.badge }}
+            </span>
+        </td>
+        <td>
+            <canvas
+                class="trust-chart"
+                data-scores='{{ net.score_history | tojson }}'
+                data-color='{{ net.badge_color }}'>
+            </canvas>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<script>
+document.querySelectorAll(".trust-chart").forEach((canvas, index) => {
+    const scores = JSON.parse(canvas.dataset.scores);
+    const labels = scores.map((_, i) => i + 1);
+    const color = canvas.dataset.color;
+
+    new Chart(canvas, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: scores,
+                borderColor: color,
+                backgroundColor: "transparent",
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { min: 0, max: 100 }
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>
