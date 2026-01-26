@@ -5,6 +5,8 @@ from ml.realtime_feature_extractor import extract_flow_features
 from ml.realtime_detector import predict_realtime
 from blockchain.trust_chain import get_trust_score
 import json
+from flask import Flask
+app = Flask(__name__)
 
 app = Flask(__name__, template_folder="templates")
 
@@ -63,4 +65,6 @@ def dashboard():
 
 def start_dashboard():
     print("🌐 Dashboard running at http://127.0.0.1:5000")
+    app.run(debug=False)
+def start_dashboard():
     app.run(debug=False)
