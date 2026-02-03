@@ -10,45 +10,58 @@
             background: #f4f6f8;
             padding: 20px;
         }
+
         h1 {
             text-align: center;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
         }
+
         th, td {
             padding: 12px;
             border-bottom: 1px solid #ddd;
             text-align: center;
         }
+
         th {
             background: #222;
             color: white;
         }
+
         .badge {
             padding: 6px 12px;
             border-radius: 12px;
             color: white;
             font-weight: bold;
         }
+
         .green { background: green; }
         .orange { background: orange; }
         .red { background: red; }
+
         canvas {
             width: 260px !important;
             height: 120px !important;
         }
+
+        .hint {
+            font-size: 12px;
+            color: gray;
+        }
     </style>
 </head>
+
+<body>
+
 {% if cloud %}
 <p style="text-align:center;color:gray;">
 ⚠️ Cloud Demo Mode – Real packet capture runs locally
 </p>
 {% endif %}
-
-<body>
 
 <h1>🔐 SmartSecureNet – Wi-Fi Trust Evolution Dashboard</h1>
 
@@ -77,22 +90,33 @@
                 {{ net.badge }}
             </span>
         </td>
+
         <td>
+        {% if net.score_history and net.score_history | length > 1 %}
             <canvas
                 class="trust-chart"
                 data-scores='{{ net.score_history | tojson }}'
                 data-color='{{ net.badge_color }}'>
             </canvas>
+        {% else %}
+            <span class="hint">
+                Trust history building…
+            </span>
+        {% endif %}
         </td>
     </tr>
     {% endfor %}
 </table>
 
 <script>
-document.querySelectorAll(".trust-chart").forEach((canvas, index) => {
+document.querySelectorAll(".trust-chart").forEach(canvas => {
     const scores = JSON.parse(canvas.dataset.scores);
+
+    // Safety check: need at least 2 points
+    if (!scores || scores.length < 2) return;
+
     const labels = scores.map((_, i) => i + 1);
-    const color = canvas.dataset.color;
+    const color = canvas.dataset.color || "green";
 
     new Chart(canvas, {
         type: "line",
@@ -107,9 +131,14 @@ document.querySelectorAll(".trust-chart").forEach((canvas, index) => {
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false }
+            },
             scales: {
-                y: { min: 0, max: 100 }
+                y: {
+                    min: 0,
+                    max: 100
+                }
             }
         }
     });

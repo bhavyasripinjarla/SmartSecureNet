@@ -1,13 +1,10 @@
-from ml.attack_simulator import simulate_attack_flow
-from ml.realtime_detector import predict_realtime
+from ml.realtime_detector import analyze_realtime_packets
 
-print("\n🚨 Simulating Attack Traffic...\n")
+print("\n🧪 ML VERIFICATION TEST\n")
 
-features = simulate_attack_flow()
+result = analyze_realtime_packets(duration=10)
 
-result = predict_realtime(features)
-
-print("🔍 ML Verdict")
-print("Prediction           :", result["prediction"])
-print("Benign Probability   :", result["benign_probability"], "%")
-print("Attack Probability   :", result["attack_probability"], "%")
+print("\n🔍 ML Verdict")
+print(f"Prediction           : {result['prediction']}")
+print(f"Benign Probability   : {result['benign_prob']} %")
+print(f"Attack Probability   : {result['attack_prob']} %")

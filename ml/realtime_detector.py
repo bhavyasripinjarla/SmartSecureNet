@@ -1,41 +1,53 @@
 import joblib
+import numpy as np
 import pandas as pd
+from ml.realtime_feature_extractor import extract_realtime_features
 
-MODEL_FILE = "ml/models/rf_model.pkl"
-FEATURE_FILE = "ml/models/feature_columns.pkl"
+MODEL_PATH = "ml/models/rf_model.pkl"
+FEATURES_PATH = "ml/models/feature_columns.pkl"
 
-# Load model & feature order
-model = joblib.load(MODEL_FILE)
-feature_columns = joblib.load(FEATURE_FILE)
+# Load model and feature schema
+model = joblib.load(MODEL_PATH)
+feature_columns = joblib.load(FEATURES_PATH)
 
-def predict_realtime(features_dict):
+def analyze_realtime_packets(duration=10):
     """
-    Predict real-time traffic behavior using trained ML model
+    Extracts real-time behaviour and aligns it with trained feature space
     """
 
-    if features_dict is None:
-        return {
-            "prediction": "NO_TRAFFIC",
-            "attack_probability": 0.0,
-            "benign_probability": 100.0
-        }
+    print(f"📡 Capturing REAL packet behaviour for {duration} seconds...")
 
-    # Convert to DataFrame
-    df = pd.DataFrame([features_dict])
+    realtime_features = extract_realtime_features(duration)
 
-    # Ensure correct feature order
-    df = df.reindex(columns=feature_columns, fill_value=0)
+    # Create empty feature row with ALL expected columns
+    feature_row = {col: 0 for col in feature_columns}
 
-    # Predict probabilities
-    probs = model.predict_proba(df)[0]
+    # Map available real-time features to training features
+    feature_mapping = {
+        "flow_duration": "Flow Duration",
+        "packet_rate": "Flow Packets/s",
+        "avg_packet_size": "Average Packet Size",
+        "syn_flag_count": "SYN Flag Count",
+        "rst_flag_count": "RST Flag Count"
+    }
 
-    benign_prob = float(probs[0]) * 100
-    attack_prob = float(probs[1]) * 100
+    for rt_key, train_key in feature_mapping.items():
+        if train_key in feature_row:
+            feature_row[train_key] = realtime_features.get(rt_key, 0)
 
-    prediction = "MALICIOUS" if attack_prob >= 50 else "BENIGN"
+    # Convert to DataFrame (IMPORTANT)
+    X = pd.DataFrame([feature_row])
+
+    # Predict
+    probabilities = model.predict_proba(X)[0]
+
+    benign_prob = probabilities[0] * 100
+    attack_prob = probabilities[1] * 100
+
+    prediction = "ATTACK" if attack_prob >= 50 else "BENIGN"
 
     return {
         "prediction": prediction,
-        "attack_probability": round(attack_prob, 2),
-        "benign_probability": round(benign_prob, 2)
+        "benign_prob": round(benign_prob, 2),
+        "attack_prob": round(attack_prob, 2)
     }

@@ -1,76 +1,73 @@
 from network_scan.scanner import scan_wifi_networks
-from packet_monitor.real_sniffer import capture_real_packets
-from ml.realtime_feature_extractor import extract_flow_features
-from ml.realtime_detector import predict_realtime
-from ml.attack_simulator import simulate_attack_flow
-from blockchain.trust_chain import get_trust_score, update_trust_score
+from network_scan.connected_wifi import get_connected_ssid
+from ml.realtime_detector import analyze_realtime_packets
 from alerts.notifier import notify_user
 from vpn_manager.vpn_trigger import trigger_vpn
+from blockchain.trust_chain import get_trust_score, update_trust_score
 from ui.dashboard import start_dashboard
-
-
-# ============================
-# CONFIGURATION
-# ============================
-USE_ATTACK_SIMULATION = False   # 🔁 Set True for demo attack
-PACKET_CAPTURE_TIME = 10        # seconds
 
 
 def run_security_engine():
     print("\n🔐 SmartSecureNet – Intelligent Public Wi-Fi Protection (ML-Based)\n")
 
+    connected_ssid = get_connected_ssid()
     networks = scan_wifi_networks()
+
+    print(f"📡 Connected Wi-Fi : {connected_ssid}\n")
 
     for net in networks:
         print("=" * 70)
 
         ssid = net.get("ssid")
+        signal = net.get("signal")
+        encryption = net.get("encryption")
 
         print(f"📶 SSID        : {ssid}")
-        print(f"📡 Signal      : {net.get('signal')}%")
-        print(f"🔐 Encryption  : {net.get('encryption')}")
+        print(f"📡 Signal      : {signal}%")
+        print(f"🔐 Encryption  : {encryption}")
 
-        # 1️⃣ Get current blockchain trust score
         trust_info = get_trust_score(ssid)
         print(f"🔗 Current Trust Score : {trust_info['trust_score']}/100")
 
-        # 2️⃣ Feature extraction
-        if USE_ATTACK_SIMULATION:
-            print("\n🚨 DEMO MODE ENABLED – Simulating attack traffic")
-            features = simulate_attack_flow()
+        # 🔴 IMPORTANT FIX HERE
+        if ssid != connected_ssid:
+            print("\n📡 Packet analysis skipped (not connected)")
+            final_risk = "LOW"
+
         else:
-            print(f"\n📡 Capturing real packets for {PACKET_CAPTURE_TIME} seconds...")
-            packet_stats = capture_real_packets(duration=PACKET_CAPTURE_TIME)
-            features = extract_flow_features(packet_stats)
+            print("\n📡 Capturing REAL packet behaviour...")
+            ml_result = analyze_realtime_packets(duration=10)
 
-        # 3️⃣ ML prediction
-        ml_result = predict_realtime(features)
+            prediction = ml_result["prediction"]
+            benign_prob = ml_result["benign_prob"]
+            attack_prob = ml_result["attack_prob"]
 
-        print("\n🤖 ML Analysis Result")
-        print("Prediction         :", ml_result["prediction"])
-        print("Benign Probability :", ml_result["benign_probability"], "%")
-        print("Attack Probability :", ml_result["attack_probability"], "%")
+            print("\n🤖 ML Analysis Result")
+            print(f"Prediction         : {prediction}")
+            print(f"Benign Probability : {benign_prob:.2f} %")
+            print(f"Attack Probability : {attack_prob:.2f} %")
 
-        # 4️⃣ Update blockchain trust score
-        updated = update_trust_score(ssid, ml_result["attack_probability"])
+            if prediction == "ATTACK" or attack_prob >= 50:
+                final_risk = "HIGH"
+            elif attack_prob >= 30:
+                final_risk = "MEDIUM"
+            else:
+                final_risk = "LOW"
 
+            if final_risk == "HIGH":
+                print("\n🚨 MALICIOUS NETWORK BEHAVIOUR DETECTED 🚨")
+                notify_user(ssid, ml_result)
+                trigger_vpn()
+            elif final_risk == "MEDIUM":
+                print("\n⚠️ Suspicious activity detected. Monitoring advised.")
+            else:
+                print("\n✅ Network behaviour appears normal")
+
+        updated = update_trust_score(ssid, final_risk)
         print("\n🔄 Blockchain Trust Update")
-        print("Updated Trust Score:", updated["trust_score"], "/100")
-
-        # 5️⃣ Response actions
-        if ml_result["attack_probability"] > 80:
-            print("\n🚨 HIGH RISK NETWORK DETECTED 🚨")
-            notify_user(ssid, ml_result)
-            trigger_vpn()
-
-        elif ml_result["attack_probability"] > 50:
-            print("\n⚠️ Suspicious network behavior detected")
-
-        else:
-            print("\n✅ Network behavior appears normal")
+        print(f"Updated Trust Score: {updated['trust_score']} /100")
 
     print("\n🛡️ SmartSecureNet scan completed successfully.\n")
-
 
 def main():
     print("==============================================")
@@ -85,17 +82,14 @@ def main():
 
     if choice == "1":
         run_security_engine()
-
     elif choice == "2":
         start_dashboard()
-
     elif choice == "3":
         run_security_engine()
         print("\n🌐 Launching Dashboard...\n")
         start_dashboard()
-
     else:
-        print("❌ Invalid choice. Please restart and choose 1, 2, or 3.")
+        print("❌ Invalid choice.")
 
 
 if __name__ == "__main__":

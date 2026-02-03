@@ -1,27 +1,87 @@
 {
-    "DBC-Wifi-2.4G": {
-        "trust_score": 82,
-        "history": [
-            {
-                "attack_probability": 7.0,
-                "delta": 2,
-                "new_score": 82
-            }
-        ]
-    },
-    "BSNL Network": {
+    "it's me\ud83d\ude09": {
         "trust_score": 84,
         "history": [
-            {
-                "attack_probability": 10.0,
-                "delta": 2,
-                "new_score": 82
-            },
-            {
-                "attack_probability": 4.0,
-                "delta": 2,
-                "new_score": 84
-            }
+            80,
+            82,
+            84
+        ]
+    },
+    "Gautam's iQOO 12": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "JioAirfiberA6": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "ASL 22": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "Infinix NOTE 40 Pro+ 5G": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "\u0639\u0631\u0634\ud83e\udd0d": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "Dr. Kunjam Nageswara Rao": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "RajaKumar": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "Dr. G. Lavnya Devi": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "Sairam 1": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "ThunderBreathing\u26a1": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
+        ]
+    },
+    "CSE LAB2": {
+        "trust_score": 82,
+        "history": [
+            80,
+            82
         ]
     }
 }

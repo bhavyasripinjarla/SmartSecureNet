@@ -1,20 +1,38 @@
-import random
+# ml/attack_simulator.py
 
-def simulate_attack_flow():
+def generate_attack_features():
     """
-    Generates flow features resembling malicious traffic
-    (DDoS / DNS spoof / scanning behavior)
+    CICIDS2017-style STRONG ATTACK
     """
-
     return {
-        "flow_duration": random.randint(1, 10),
-        "total_fwd_packets": random.randint(200, 500),
-        "total_bwd_packets": random.randint(0, 10),
-        "flow_packets_per_sec": random.uniform(1000, 5000),
-        "packet_length_mean": random.uniform(50, 90),
-        "packet_length_std": random.uniform(200, 500),
-        "flow_iat_mean": random.uniform(0.0001, 0.01),
-        "fwd_iat_mean": random.uniform(0.0001, 0.01),
-        "bwd_iat_mean": random.uniform(0.1, 1.0),
-        "avg_packet_size": random.uniform(60, 120)
+        "Flow Duration": 5,
+        "Total Fwd Packets": 50000,
+        "Total Backward Packets": 45000,
+        "Flow Packets/s": 30000,
+        "Packet Length Mean": 1400,
+        "Packet Length Std": 1000,
+        "Flow IAT Mean": 0.01,
+        "Flow IAT Std": 0.005,
+        "Fwd IAT Mean": 0.01,
+        "Bwd IAT Mean": 0.01,
+        "Average Packet Size": 1300
+    }
+
+
+def generate_benign_features():
+    """
+    Normal browsing traffic
+    """
+    return {
+        "Flow Duration": 200000,
+        "Total Fwd Packets": 120,
+        "Total Backward Packets": 110,
+        "Flow Packets/s": 2,
+        "Packet Length Mean": 500,
+        "Packet Length Std": 80,
+        "Flow IAT Mean": 400,
+        "Flow IAT Std": 120,
+        "Fwd IAT Mean": 380,
+        "Bwd IAT Mean": 390,
+        "Average Packet Size": 520
     }
